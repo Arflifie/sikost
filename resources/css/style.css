@@ -1,0 +1,65 @@
+/* Paste variabel warna sebelumnya disini */
+:root {
+    --color-royal: #334EAC;
+    --color-moon: #F7F2EB;
+    --color-china: #7096D1;
+    --color-asian-pear: #F2F0DE;
+    --color-midnight: #081F5C;
+    --color-dawn: #D0E3FF;
+    --color-jicama: #FFF9F0;
+    --color-porcelain: #EDF1F6;
+    --color-sky: #BAD6EB;
+}
+
+body {
+    background-color: var(--color-jicama);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Utilities Elegan */
+.text-gradient {
+    background: linear-gradient(45deg, var(--color-midnight), var(--color-royal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.card-hover {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(8, 31, 92, 0.15) !important; /* Midnight shadow */
+    border-color: var(--color-sky);
+}
+
+.img-rounded-custom {
+    border-radius: 30px 0 30px 0;
+    box-shadow: 20px 20px 0px var(--color-china); /* Efek shadow solid */
+}
+
+.btn-royal-glow {
+    background-color: var(--color-royal);
+    color: white;
+    box-shadow: 0 4px 15px rgba(51, 78, 172, 0.4); /* Royal shadow */
+    transition: all 0.3s;
+}
+
+.btn-royal-glow:hover {
+    background-color: var(--color-midnight);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Background Shapes Decor */
+.blob-bg {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--color-dawn) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0.4;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(50px);
+}
