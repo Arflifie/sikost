@@ -11,9 +11,7 @@
         @forelse ($kamar as $item)
         <div class="col-md-4">
             <div class="card mb-4 shadow-sm h-100">
-                <img src="{{ asset('storage/' . ($item->foto_kamar ?? 'default.png')) }}"
-                    class="card-img-top"
-                    style="height: 200px; object-fit: cover;">
+                <img src="{{ Storage::disk('s3')->url($item->foto_kamar) }}">
                 <div class="card-body d-flex flex-column">
 
                     <h5 class="card-title">
