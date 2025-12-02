@@ -1,47 +1,80 @@
 <?php
 
-use App\Http\Controllers\KamarController;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\KamarController;
 use App\Http\Controllers\PelaporanController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\Penyewa\BerandaController;
 use App\Http\Controllers\Penyewa\ProfileController;
 use App\Http\Controllers\Penyewa\RiwayatController;
-use App\Http\Controllers\PembayaranController;
+
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-//Route Penyewa
-Route::get('/beranda', [BerandaController::class, 'index'])->name('beranda');
-Route::get('/profil', [ProfileController::class, 'index'])->name('profil');
-Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
+// Midtrans Webhook
+Route::post('/midtrans/webhook', [PembayaranController::class, 'notificationHandler'])->name('midtrans.webhook');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::post('/midtrans/webhook', [PembayaranController::class, 'notificationHandler']);
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/kamar', [KamarController::class, 'index']);
-    Route::get('/kamar/{id}', [KamarController::class, 'show']);
+    // BAWAAN DARI BREEZE
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+    // --- PENYEWA ---
+    Route::get('/beranda', [BerandaController::class, 'index'])->name('penyewa.beranda');
+    Route::get('/profil', [ProfileController::class, 'index'])->name('profil');
+    Route::get('/riwayat', [RiwayatController::class, 'index'])->name('penyewa.riwayat');
+    
+    Route::get('/kamar', [KamarController::class, 'index'])->name('kamar.index');
+    Route::get('/kamar/{id}', [KamarController::class, 'show'])->name('kamar.show');
+
+    Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
+    Route::post('/pembayaran', [PembayaranController::class, 'store'])->name('pembayaran.store');
+
+    Route::get('/pelaporan', [PelaporanController::class, 'index'])->name('pelaporan.index');
+    Route::post('/pelaporan', [PelaporanController::class, 'store'])->name('pelaporan.store');
+
+    // --- ADMIN ---
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/pembayaran', [PembayaranController::class, 'adminIndex'])->name('pembayaran.index');
+        
+        Route::post('/pelaporan/{id}/update', [PelaporanController::class, 'updateStatusAdmin'])->name('pelaporan.update');
+    });
+    // --- PEMILIK ---
+    Route::prefix('pemilik')->name('pemilik.')->group(function () {
+        Route::get('/pembayaran', [PembayaranController::class, 'pemilikIndex'])->name('pembayaran.index');
+    });
+    // --- OB ---
+    Route::prefix('ob')->name('ob.')->group(function () {
+        Route::post('/pelaporan/{id}/update', [PelaporanController::class, 'updateStatusOB'])->name('pelaporan.update');
+    });
+
+    // ------------ ROUTE SENGAJA TIDAK DI BLOCK PER-ROLE SAAT DEVELOPMENT ------------
+    // ------------ JIKA SUDAH PRODUCTION GANTI DENGAN FUNCTION DIBAWAH ------------
+
+    // Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {});
+    // Route::middleware(['role:pemilik'])->prefix('pemilik')->name('pemilik.')->group(function () {});
+    // Route::middleware(['role:ob'])->prefix('ob')->name('ob.')->group(function () {});
 });
-
-
-
-Route::get('/pelaporan', [PelaporanController::class, 'index'])->name('pelaporan.index');
-Route::post('/pelaporan/store', [PelaporanController::class, 'store'])->name('pelaporan.store');
-
-// Khusus admin
-Route::post('/pelaporan/{id}/update-admin', [PelaporanController::class, 'updateStatusAdmin'])
-    ->name('pelaporan.update.admin');
-
-// Khusus OB
-Route::post('/pelaporan/{id}/update-ob', [PelaporanController::class, 'updateStatusOB'])
-    ->name('pelaporan.update.ob');
 
 require __DIR__ . '/auth.php';
