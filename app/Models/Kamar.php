@@ -11,25 +11,12 @@ class Kamar extends Model
 
     protected $table = 'kamar';
     protected $primaryKey = 'id_kamar';
-    protected $guarded = ['id_kamar'];
 
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class, 'kamar_id', 'id_kamar');
-    }
-
-    public function getHargaRupiahAttribute()
-    {
-        return 'Rp ' . number_format($this->harga, 0, ',', '.');
-    }
-
-    public function getStatusBadgeAttribute()
-    {
-        return match($this->status) {
-            'tersedia' => 'success',
-            'penuh' => 'danger',
-            'maintenance' => 'warning',
-            default => 'secondary',
-        };
-    }
+    protected $fillable = [
+        'no_kamar',
+        'foto_kamar',
+        'deskripsi_kamar',
+        'harga',
+        'status'
+    ];
 }
