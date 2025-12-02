@@ -8,6 +8,7 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\Penyewa\BerandaController;
 use App\Http\Controllers\Penyewa\ProfileController;
 use App\Http\Controllers\Penyewa\RiwayatController;
+use App\Http\Controllers\Admin\KamarController as AdminKamarController;
 
 /*
 |--------------------------------------------------------------------------
