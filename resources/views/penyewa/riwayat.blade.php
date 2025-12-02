@@ -1,7 +1,8 @@
-@extends()
+@extends('layouts.layoutpenyewa')
 
 @section('content')
     <section>
-        <p>Profile User</p>
+        <p>Riwayat</p>
     </section>
 @endsection
+
