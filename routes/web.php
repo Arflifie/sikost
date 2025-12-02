@@ -1,14 +1,18 @@
 <?php
 
-use App\Http\Controllers\Penyewa\BerandaController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Penyewa\BerandaController;
+use App\Http\Controllers\Penyewa\ProfileController;
+use App\Http\Controllers\Penyewa\RiwayatController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+//Route Penyewa
 Route::get('/beranda', [BerandaController::class, 'index'])->name('beranda');
+Route::get('/profil', [ProfileController::class, 'index'])->name('profil');
+Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
