@@ -78,7 +78,7 @@
     }
 </style>
 
-<section class="profile-section">
+<section class="profile-section ">
     <div class="container">
         <div class="row">
             
