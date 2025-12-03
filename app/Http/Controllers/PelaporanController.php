@@ -19,7 +19,7 @@ class PelaporanController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('pelaporan.index', compact('pelaporan'));
+        return view('penyewa.pelaporan', compact('pelaporan'));
     }
 
     /**
