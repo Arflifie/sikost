@@ -30,7 +30,7 @@ Route::post('/midtrans/webhook', [PembayaranController::class, 'notificationHand
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+// Route::middleware('auth')->group(function () {
     // BAWAAN DARI BREEZE
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -82,6 +82,6 @@ Route::middleware('auth')->group(function () {
     // Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {});
     // Route::middleware(['role:pemilik'])->prefix('pemilik')->name('pemilik.')->group(function () {});
     // Route::middleware(['role:ob'])->prefix('ob')->name('ob.')->group(function () {});
-});
+// });
 
 require __DIR__ . '/auth.php';
