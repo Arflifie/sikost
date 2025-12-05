@@ -1,337 +1,351 @@
 @extends('layouts.layoutPenyewa')
 
-@section('title', 'Riwayat Booking - SiKos')
-
 @section('konten')
+    {{-- ====================================================================
+         1. CSS INTERNAL
+         ==================================================================== --}}
+    <style>
+        /* Offset agar konten tidak tenggelam di bawah navbar fixed-top */
+        .page-offset {
+            padding-top: 120px !important;
+        }
 
-<style>
-    .booking-section {
-        padding: 60px 0;
-        background-color: #f8f9fa;
-        min-height: 90vh;
-    }
+        /* Styling Dasar */
+        body {
+            background-color: var(--color-asean-pear);
+            color: var(--color-midnight);
+        }
 
-    /* Styling Card Booking Utama */
-    .booking-card {
-        border: none;
-        border-radius: 15px;
-        background: #fff;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-bottom: 30px;
-        overflow: hidden;
-    }
+        /* Text Gradient (Untuk Harga) */
+        .text-gradient {
+            background: linear-gradient(45deg, var(--color-midnight), var(--color-royal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    .booking-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
+        /* Kartu Booking */
+        .card-booking {
+            border: none;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
 
-    /* Styling Gambar Kos */
-    .booking-img-wrapper {
-        height: 100%;
-        min-height: 200px;
-        position: relative;
-    }
+        .card-booking:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(51, 78, 172, 0.15);
+        }
 
-    .booking-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+        .booking-header {
+            background-color: var(--color-porcelain);
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e6ed;
+        }
 
-    /* Label Status (Pojok Kiri Atas Gambar) */
-    .booking-status-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        padding: 6px 15px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
+        .table-simple th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--color-royal);
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--color-porcelain);
+        }
 
-    /* Status Colors */
-    .status-active { background-color: #d1e7dd; color: #0f5132; } /* Hijau */
-    .status-pending { background-color: #fff3cd; color: #664d03; } /* Kuning */
-    .status-finished { background-color: #e2e3e5; color: #41464b; } /* Abu */
+        .table-simple td {
+            font-size: 0.9rem;
+            vertical-align: middle;
+            padding: 12px 10px;
+            color: var(--midnight);
+        }
 
-    /* Bagian Header Card */
-    .booking-header {
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 15px;
-        margin-bottom: 15px;
-    }
+        .dashed-line {
+            border-top: 2px dashed var(--color-sky);
+            margin: 20px 0;
+        }
 
-    /* Detail Item (Ikon + Teks) */
-    .detail-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
-    .detail-item i {
-        width: 25px;
-        text-align: center;
-        margin-right: 10px;
-        color: #0d6efd;
-    }
+        .pagination-modern {
+            gap: 5px;
+        }
 
-    /* Tombol Toggle Riwayat Pembayaran */
-    .btn-toggle-history {
-        background-color: #f1f8ff;
-        color: #0d6efd;
-        border: none;
-        font-weight: 600;
-        width: 100%;
-        text-align: left;
-        padding: 12px 20px;
-        border-radius: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .btn-toggle-history:hover {
-        background-color: #e7f1ff;
-        color: #0a58ca;
-    }
+        .pagination-modern .page-link {
+            border: 1px solid var(--color-porcelain) !important;
+            border-radius: 8px !important;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-royal) !important;
+            background-color: #fff !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 35px;
+            height: 35px;
+        }
 
-    /* Styling Tabel Riwayat Pembayaran */
-    .history-table thead th {
-        background-color: #f8f9fa;
-        border-top: none;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        color: #888;
-    }
-    .history-container {
-        background-color: #fff;
-        padding: 20px;
-        border-top: 1px dashed #dee2e6;
-    }
-</style>
+        .pagination-modern .page-link:hover {
+            background-color: var(--color-dawn) !important;
+            transform: translateY(-1px);
+        }
 
-<section class="booking-section">
-    <div class="container">
-        
-        <div class="d-flex justify-content-between align-items-center mb-5">
-            <div>
-                <h2 class="fw-bold mb-1">Riwayat Booking</h2>
-                <p class="text-muted">Kelola sewa kos dan pantau riwayat pembayaranmu.</p>
-            </div>
-            <div class="d-none d-md-block">
-                <select class="form-select w-auto">
-                    <option>Semua Status</option>
-                    <option>Aktif</option>
-                    <option>Selesai</option>
-                </select>
-            </div>
-        </div>
+        .pagination-modern .page-item.active .page-link {
+            background-color: var(--color-royal) !important;
+            color: var(--color-midnight) !important;
+            border-color: var(--color-royal) !important;
+            box-shadow: 0 4px 12px rgba(51, 78, 172, 0.3);
+        }
 
-        <div class="row">
-            <div class="col-lg-10 mx-auto">
+        .pagination-modern .page-item.disabled .page-link {
+            background-color: #f8f9fa !important;
+            color: #ccc !important;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
-                <div class="booking-card">
-                    <div class="row g-0">
-                        <div class="col-md-4 booking-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600" class="booking-img" alt="Kos Image">
-                            <span class="booking-status-badge status-active">
-                                <i class="fas fa-check-circle me-1"></i> Sewa Aktif
-                            </span>
-                        </div>
-                        
-                        <div class="col-md-8">
-                            <div class="card-body p-4">
-                                <div class="booking-header d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h4 class="card-title fw-bold mb-1">Kos Melati Residence</h4>
-                                        <small class="text-muted">ID Booking: #BK-2023-001</small>
-                                    </div>
-                                    <div class="text-end">
-                                        <h5 class="fw-bold text-primary mb-0">Rp 1.200.000</h5>
-                                        <small class="text-muted">/ bulan</small>
-                                    </div>
-                                </div>
+        .btn-nav-text {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+            width: auto !important;
+        }
+    </style>
 
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <i class="fas fa-map-marker-alt"></i> Kukusan, Depok
-                                        </div>
-                                        <div class="detail-item">
-                                            <i class="fas fa-bed"></i> Kamar Tipe A (No. 12)
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <i class="fas fa-calendar-alt"></i> Mulai: 25 Sep 2023
-                                        </div>
-                                        <div class="detail-item">
-                                            <i class="fas fa-clock"></i> Durasi: Per Bulan
-                                        </div>
-                                    </div>
-                                </div>
+    {{-- WRAPPER OFFSET (anti tenggelam) --}}
+    <div class="page-offset">
 
-                                <div class="d-flex flex-column gap-2">
-                                    <div class="d-flex gap-2 mb-2">
-                                        <button class="btn btn-primary flex-grow-1 fw-bold">
-                                            <i class="fas fa-wallet me-2"></i> Bayar Bulan Ini
-                                        </button>
-                                        <button class="btn btn-outline-secondary">
-                                            <i class="fas fa-comment-dots"></i> Chat Owner
-                                        </button>
-                                    </div>
+        <div class="blob-bg" style="top: 100px; right: -200px;"></div>
 
-                                    <button class="btn-toggle-history" type="button" data-bs-toggle="collapse" data-bs-target="#historyCollapse1" aria-expanded="false">
-                                        <span><i class="fas fa-receipt me-2"></i> Lihat Riwayat Pembayaran</span>
-                                        <i class="fas fa-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="container" style="padding-bottom: 60px; color: var(--asian-pear)">
 
-                    <div class="collapse" id="historyCollapse1">
-                        <div class="history-container">
-                            <h6 class="fw-bold mb-3 ms-2">Catatan Transaksi</h6>
-                            <div class="table-responsive">
-                                <table class="table table-hover history-table align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>Periode Tagihan</th>
-                                            <th>Tanggal Bayar</th>
-                                            <th>Metode</th>
-                                            <th>Nominal</th>
-                                            <th>Status</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="table-warning">
-                                            <td class="fw-bold">Desember 2023</td>
-                                            <td>-</td>
-                                            <td>-</td>
-                                            <td>Rp 1.200.000</td>
-                                            <td><span class="badge bg-warning text-dark rounded-pill">Belum Dibayar</span></td>
-                                            <td><a href="#" class="btn btn-sm btn-primary">Bayar</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>November 2023</td>
-                                            <td>24 Nov 2023</td>
-                                            <td>Transfer BCA</td>
-                                            <td>Rp 1.200.000</td>
-                                            <td><span class="badge bg-success rounded-pill">Lunas</span></td>
-                                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download"></i> Invoice</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Oktober 2023</td>
-                                            <td>25 Okt 2023</td>
-                                            <td>Gopay</td>
-                                            <td>Rp 1.200.000</td>
-                                            <td><span class="badge bg-success rounded-pill">Lunas</span></td>
-                                            <td><a href="#" class="btn btn-sm btn-light border"><i class="fas fa-download"></i> Invoice</a></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+            <div class="row mb-5">
+                <div class="col-md-8">
+                    <h2 class="display-6 fw-bold" style="color: var(--royal)">Riwayat Booking</h2>
+                    <p class="" style="color: var(--midnight)">Pantau status sewa dan riwayat pembayaran Anda.</p>
                 </div>
-                <div class="booking-card">
-                    <div class="row g-0">
-                        <div class="col-md-4 booking-img-wrapper">
-                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600" class="booking-img" style="filter: grayscale(80%);" alt="Kos Image">
-                            <span class="booking-status-badge status-finished">
-                                <i class="fas fa-history me-1"></i> Selesai
+            </div>
+
+            <div class="row justify-content-center">
+
+                {{-- SAMPLE CARD --}}
+                <div class="col-lg-10 mb-5">
+                    <div class="card card-booking">
+
+                        <div class="booking-header d-flex justify-content-between align-items-center">
+                            <span
+                                class="badge rounded-pill bg-warning text-dark border border-warning bg-opacity-25 px-3 py-2">
+                                <i class="fas fa-clock me-1"></i> Menunggu Pelunasan
                             </span>
+
+                            <div class="fw-bold" style="color: var(--china); letter-spacing: 1px;">
+                                #INV-2025-001
+                            </div>
                         </div>
-                        <div class="col-md-8">
-                            <div class="card-body p-4">
-                                <div class="booking-header d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h4 class="card-title fw-bold mb-1 text-muted">Kos Mawar Indah</h4>
-                                        <small class="text-muted">ID Booking: #BK-2022-098</small>
+
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+
+                                <div class="col-md-4">
+                                    <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=800&q=80"
+                                        class="img-fluid rounded-3 mb-3 shadow-sm"
+                                        style="width: 100%; height: 180px; object-fit: cover;" alt="Kamar">
+
+                                    <h5 class="fw-bold mb-1" style="color: var(--color-midnight);">Kamar Standard</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-map-marker-alt me-1"></i> Kost Griya Cendana
+                                    </p>
+                                </div>
+
+                                <div class="col-md-5 border-start-md ps-md-4">
+                                    <h6 class="text-uppercase text-muted small fw-bold mb-3">Rincian Sewa</h6>
+
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Check-in</small>
+                                            <span class="fw-bold text-dark">01 Nov 2025</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Durasi</small>
+                                            <span class="fw-bold text-dark">1 Tahun</span>
+                                        </div>
                                     </div>
-                                    <div class="text-end">
-                                        <h5 class="fw-bold text-muted mb-0">Rp 950.000</h5>
-                                        <small class="text-muted">/ bulan</small>
+
+                                    <div class="mt-4 pt-2 border-top border-light">
+                                        <small class="text-muted d-block mb-1">Total Tagihan</small>
+                                        <h3 class="fw-bold text-dark mb-0">Rp 1.500.000</h3>
                                     </div>
                                 </div>
 
-                                <div class="row mb-4 text-muted">
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <i class="fas fa-map-marker-alt text-secondary"></i> Dago, Bandung
-                                        </div>
-                                        <div class="detail-item">
-                                            <i class="fas fa-bed text-secondary"></i> Kamar Standar
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="detail-item">
-                                            <i class="fas fa-calendar-check text-secondary"></i> Berakhir: 20 Aug 2023
-                                        </div>
-                                        <div class="detail-item">
-                                            <i class="fas fa-file-contract text-secondary"></i> Durasi: 6 Bulan
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button class="btn-toggle-history bg-light text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#historyCollapse2" aria-expanded="false">
-                                    <span><i class="fas fa-receipt me-2"></i> Lihat Arsip Pembayaran</span>
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                
-                                <div class="mt-3">
-                                    <a href="#" class="text-decoration-none small text-muted">
-                                        <i class="fas fa-redo me-1"></i> Pesan Lagi Kos Ini?
+                                <div class="col-md-3 text-md-end">
+                                    <a href="#"
+                                        class="btn btn-outline-secondary btn-royal-glow rounded-pill w-100 py-2">
+                                        <i class="fas fa-wallet me-2"></i> Bayar Sekarang
                                     </a>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="collapse" id="historyCollapse2">
-                        <div class="history-container bg-light">
-                            <h6 class="fw-bold mb-3 ms-2 text-muted">Arsip Transaksi</h6>
-                            <div class="table-responsive">
-                                <table class="table table-sm text-muted">
-                                    <thead>
-                                        <tr>
-                                            <th>Periode</th>
-                                            <th>Tanggal</th>
-                                            <th>Nominal</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Agustus 2023</td>
-                                            <td>20 Agt 2023</td>
-                                            <td>Rp 950.000</td>
-                                            <td>Lunas</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Juli 2023</td>
-                                            <td>20 Jul 2023</td>
-                                            <td>Rp 950.000</td>
-                                            <td>Lunas</td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="4" class="text-center fst-italic pt-3">... Data sebelumnya disembunyikan ...</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="dashed-line"></div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0 small text-muted text-uppercase">
+                                    <i class="fas fa-history me-2"></i> Riwayat Pembayaran Masuk
+                                </h6>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseHistory-1">
+                                    <i class="fas fa-chevron-down small"></i> Lihat Detail
+                                </button>
+                            </div>
+
+                            <div class="collapse" id="collapseHistory-1">
+                                <div class="card card-body border-0 bg-light p-3 rounded-3">
+                                    <div class="table-responsive">
+
+                                        <table class="table table-simple table-hover mb-0" id="table-1">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tanggal</th>
+                                                    <th>Keterangan</th>
+                                                    <th>Metode</th>
+                                                    <th class="text-end">Nominal</th>
+                                                    <th class="text-center">Status</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <tr>
+                                                    <td>01 Nov 2025</td>
+                                                    <td>Booking Fee</td>
+                                                    <td>BCA</td>
+                                                    <td class="text-end fw-bold">Rp 500.000</td>
+                                                    <td class="text-center"><span
+                                                            class="badge bg-success bg-opacity-10 text-success">Lunas</span>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>05 Nov 2025</td>
+                                                    <td>Pelunasan 1</td>
+                                                    <td>QRIS</td>
+                                                    <td class="text-end fw-bold">Rp 1.500.000</td>
+                                                    <td class="text-center"><span
+                                                            class="badge bg-success bg-opacity-10 text-success">Lunas</span>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>01 Des 2025</td>
+                                                    <td>Perpanjangan 2</td>
+                                                    <td>Mandiri</td>
+                                                    <td class="text-end fw-bold">Rp 1.500.000</td>
+                                                    <td class="text-center"><span
+                                                            class="badge bg-success bg-opacity-10 text-success">Lunas</span>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td>01 Jan 2026</td>
+                                                    <td>Perpanjangan 3</td>
+                                                    <td>BCA</td>
+                                                    <td class="text-end fw-bold">Rp 1.500.000</td>
+                                                    <td class="text-center"><span
+                                                            class="badge bg-warning bg-opacity-10 text-dark">Pending</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                    <nav class="d-flex justify-content-end mt-4">
+                                        <ul class="pagination pagination-modern mb-0" id="pagin-1"></ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
+
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                simplePagination('table-1', 'pagin-1', 3);
+                            });
+                        </script>
                     </div>
                 </div>
-                </div>
-        </div>
-    </div>
-</section>
 
+            </div>
+        </div>
+
+    </div> {{-- page-offset END --}}
+
+    {{-- JAVASCRIPT LOGIC --}}
+    <script>
+        function simplePagination(tableId, paginId, rowsPerPage) {
+            const table = document.getElementById(tableId);
+            const pagin = document.getElementById(paginId);
+            if (!table || !pagin) return;
+
+            const tbody = table.querySelector('tbody');
+            const rows = tbody.querySelectorAll('tr');
+            const rowCount = rows.length;
+            const pageCount = Math.ceil(rowCount / rowsPerPage);
+            let currentPage = 1;
+
+            function showPage(page) {
+                const start = (page - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                rows.forEach((row, index) => {
+                    row.style.display = (index >= start && index < end) ? '' : 'none';
+                });
+            }
+
+            const updateWidget = () => {
+                pagin.innerHTML = '';
+
+                if (pageCount <= 1) {
+                    showPage(1);
+                    return;
+                }
+
+                // Prev
+                let liPrev = document.createElement('li');
+                liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                liPrev.innerHTML = `<a class="page-link btn-nav-text">Previous</a>`;
+                liPrev.onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updateWidget();
+                    }
+                };
+                pagin.appendChild(liPrev);
+
+                // Numbers
+                for (let i = 1; i <= pageCount; i++) {
+                    let li = document.createElement('li');
+                    li.className = `page-item ${currentPage === i ? 'active' : ''}`;
+                    li.innerHTML = `<a class="page-link">${i}</a>`;
+                    li.onclick = () => {
+                        currentPage = i;
+                        updateWidget();
+                    };
+                    pagin.appendChild(li);
+                }
+
+                // Next
+                let liNext = document.createElement('li');
+                liNext.className = `page-item ${currentPage === pageCount ? 'disabled' : ''}`;
+                liNext.innerHTML = `<a class="page-link btn-nav-text">Next</a>`;
+                liNext.onclick = () => {
+                    if (currentPage < pageCount) {
+                        currentPage++;
+                        updateWidget();
+                    }
+                };
+                pagin.appendChild(liNext);
+
+                showPage(currentPage);
+            };
+
+            updateWidget();
+        }
+    </script>
 @endsection
