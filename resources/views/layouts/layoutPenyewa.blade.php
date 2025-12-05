@@ -27,6 +27,8 @@
     @include('layouts.components.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- Font Awesome Icon --}}
+    <script src="https://kit.fontawesome.com/32571c53f3.js" crossorigin="anonymous"></script>
 
     {{-- JS Penyewa --}}
     <script src="{{ asset('js/penyewa.js') }}"></script>
