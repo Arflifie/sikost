@@ -1,3 +1,4 @@
+yg ini 
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -12,17 +13,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tagihan', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('penyewa_id');
-            $table->unsignedBigInteger('booking_id');
-            $table->integer('jumlah_tagihan');
-            $table->date('tanggal_tagihan');
-            $table->enum('status', ['belum bayar','menunggu_konfirmasi','lunas']);
-            $table->string('bukti_pembayaran')->nullable();
-            $table->timestamps();
+            $table->id('id_tagihan');
             
-            $table->foreign('penyewa_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('booking_id')->references('id')->on('booking')->onDelete('cascade');
+            $table->foreignId('booking_id')->constrained('booking', 'id_booking')->onDelete('cascade');
+            
+            $table->foreignId('pembayaran_id')->nullable()->constrained('pembayaran', 'id_pembayaran')->onDelete('set null');
+            
+            $table->date('tanggal_tagihan')->useCurrent();
+            $table->date('tanggal_check_out_new')->nullable();
+            
+            $table->unsignedBigInteger('biaya');
+            $table->timestamps();
         });
     }
     /**
