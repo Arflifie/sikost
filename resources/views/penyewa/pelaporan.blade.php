@@ -235,15 +235,4 @@
     </div>
 </section>
 
-{{-- CTA KECIL DI BAWAH, opsional --}}
-<section class="cta-section">
-    <div class="container">
-        <h2>Butuh bantuan tambahan?</h2>
-        <p>Jika keluhanmu belum tertangani, hubungi admin kos melalui kontak yang tersedia di aplikasi.</p>
-        <button class="btn btn-light-custom">
-            Lihat Kontak Pengelola <i class="fas fa-arrow-right ms-2"></i>
-        </button>
-    </div>
-</section>
-
 @endsection

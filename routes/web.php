@@ -57,8 +57,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
     Route::post('/pembayaran', [PembayaranController::class, 'store'])->name('pembayaran.store');
 
-    Route::get('/pelaporan', [PelaporanController::class, 'index'])->name('pelaporan.index');
-    Route::post('/pelaporan', [PelaporanController::class, 'store'])->name('pelaporan.store');
+    Route::get('/beranda/pelaporan', [PelaporanController::class, 'index'])->name('pelaporan.index');
+    Route::post('/beranda/pelaporan', [PelaporanController::class, 'store'])->name('pelaporan.store');
     // END PENYEWA
 
     // --- ADMIN ---

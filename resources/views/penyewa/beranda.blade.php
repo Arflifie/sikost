@@ -15,6 +15,6 @@
 <!-- Testimonial Section -->
 @include('layouts.components.beranda.section4')
 
-<!-- CTA Section -->
+<!-- Pelaporan Section -->
 @include('layouts.components.beranda.section5')
 @endsection
