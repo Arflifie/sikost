@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Penyewa;
 
+use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
 use App\Models\Booking;
+use App\Models\Kamar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Midtrans\Config;
@@ -20,6 +22,7 @@ class PembayaranController extends Controller
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
     }
+
     /**
      * GET /pembayaran
      * Actor: Penyewa
@@ -28,8 +31,6 @@ class PembayaranController extends Controller
     public function index()
     {
         $userId = Auth::id();
-
-        // Ambil pembayaran dimana booking-nya milik user ini
         $pembayaran = Pembayaran::whereHas('booking', function($query) use ($userId) {
             $query->where('user_id', $userId);
         })->orderBy('created_at', 'desc')->get();
@@ -47,19 +48,19 @@ class PembayaranController extends Controller
         $request->validate([
             'booking_id' => 'required|exists:booking,id_booking',
             'total_pembayaran' => 'required|numeric',
-            'jenis_pembayaran' => 'required|string', 
+            'jenis_pembayaran' => 'required|string',
         ]);
 
         $pembayaran = new Pembayaran();
         $pembayaran->booking_id = $request->booking_id;
         $pembayaran->total_pembayaran = $request->total_pembayaran;
         $pembayaran->jenis_pembayaran = $request->jenis_pembayaran;
-        $pembayaran->status = 'pending'; 
+        $pembayaran->status = 'pending';
         $pembayaran->metode_pembayaran = 'Midtrans Gateway';
         $pembayaran->save();
 
         $orderId = 'PAY-' . $pembayaran->id_pembayaran . '-' . time();
-        
+
         $pembayaran->midtrans_code = $orderId;
         $pembayaran->save();
 
@@ -76,7 +77,7 @@ class PembayaranController extends Controller
 
         try {
             $snapToken = Snap::getSnapToken($params);
-            
+
             return view('pembayaran.pay', [
                 'snapToken' => $snapToken,
                 'pembayaran' => $pembayaran
@@ -89,46 +90,40 @@ class PembayaranController extends Controller
 
     public function notificationHandler(Request $request)
     {
-        \Log::info('Midtrans Webhook Hit:', $request->all());
-
         $orderId = $request->input('order_id');
         $transactionStatus = $request->input('transaction_status');
-        $fraudStatus = $request->input('fraud_status');
         $paymentType = $request->input('payment_type');
 
-        if (empty($orderId)) {
-            return response(['message' => 'Invalid Payload: No Order ID'], 400);
-        }
-
         $pembayaran = Pembayaran::where('midtrans_code', $orderId)->first();
+        if (!$pembayaran) return response(['message' => 'Not found'], 404);
 
-        if (!$pembayaran) {
-            return response(['message' => 'Order not found'], 404);
-        }
+        $booking = $pembayaran->booking;
 
-        if ($transactionStatus == 'capture') {
-            if ($paymentType == 'credit_card') {
-                if ($fraudStatus == 'challenge') {
-                    $pembayaran->status = 'pending';
-                } else {
-                    $pembayaran->status = 'verified';
-                }
-            }
-        } else if ($transactionStatus == 'settlement') {
+        $isPaid = false;
+        if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             $pembayaran->status = 'verified';
-        } else if ($transactionStatus == 'pending') {
-            $pembayaran->status = 'pending';
-        } else if ($transactionStatus == 'deny' || $transactionStatus == 'expire' || $transactionStatus == 'cancel') {
+            $isPaid = true;
+        } elseif ($transactionStatus == 'expire' || $transactionStatus == 'cancel' || $transactionStatus == 'deny') {
             $pembayaran->status = 'failed';
+            $booking->update(['status_booking' => 'cancel']);
         }
 
         $pembayaran->metode_pembayaran = $paymentType;
-        
         $pembayaran->save();
-        
-        return response(['message' => 'Payment status updated']);
-    }
 
+        if ($isPaid) {
+            if (abs($pembayaran->total_pembayaran - $booking->total_harga) < 1000) {
+                $booking->update(['status_booking' => 'lunas']);
+            } else {
+                $booking->update(['status_booking' => 'dp_50']);
+            }
+            if ($booking->kamar) {
+                $booking->kamar->update(['status' => 'tidak tersedia']);
+            }
+        }
+
+        return response(['message' => 'Status Updated']);
+    }
     /**
      * GET /admin/pembayaran
      * Actor: Admin

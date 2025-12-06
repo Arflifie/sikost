@@ -6,48 +6,70 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Kamar;
 use App\Models\Profile;
+use App\Models\Pembayaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Notification;
 
 class BookingController extends Controller
 {
+
+    public function create($kamar_id)
+    {
+        $user = Auth::user();
+        $profile = Profile::where('user_id', $user->id)->first();
+
+        if (!$profile) {
+            return redirect()->route('profile.index')
+                ->withErrors(['msg' => 'Anda harus melengkapi profil terlebih dahulu sebelum booking']);
+        }
+
+        if (empty($profile->nik) || empty($profile->foto_ktp) || empty($profile->no_hp)) {
+            return redirect()->route('profile.index')
+                ->withErrors(['msg' => 'Mohon lengkapi NIK, No HP, dan Foto KTP untuk verifikasi sewa']);
+        }
+
+        $kamar = Kamar::findOrFail($kamar_id);
+        if ($kamar->status !== 'tersedia') {
+            return back()->withErrors(['msg' => 'Kamar ini sudah tidak tersedia.']);
+        }
+
+        return view('penyewa.booking.create', compact('kamar', 'profile'));
+    }
+
     /**
      * POST /booking
      * Membuat booking baru
      */
     public function store(Request $request)
     {
-        $user = Auth::user();
-        $profile = Profile::where('user_id', $user->id)->first();
-
-        if (!$profile || !$profile->nik) {
-            return redirect()->route('profile.index')
-                ->withErrors(['msg' => 'Harap lengkapi Data Diri dan NIK sebelum melakukan booking.']);
-        }
-
         $request->validate([
             'kamar_id' => 'required|exists:kamar,id_kamar',
             'tanggal_check_in' => 'required|date|after_or_equal:today',
             'durasi_tahun' => 'required|integer|min:1',
+            'opsi_bayar' => 'required|in:50,100',
         ]);
 
+        $user = Auth::user();
+        $profile = Profile::where('user_id', $user->id)->firstOrFail();
         $kamar = Kamar::findOrFail($request->kamar_id);
 
-        if ($kamar->status !== 'tersedia') {
-            return back()->withErrors(['msg' => 'Maaf, kamar ini sudah tidak tersedia.']);
-        }
+        $durasi = (int) $request->durasi_tahun;
+        $totalHargaSewa = $kamar->harga * $durasi;
+        $persentase = $request->opsi_bayar;
+        $nominalBayar = $totalHargaSewa * ($persentase / 100);
 
-        $checkIn = Carbon::parse($request->tanggal_check_in);
-        $durasi = $request->durasi_tahun;
+        $checkIn = \Carbon\Carbon::parse($request->tanggal_check_in);
         $checkOut = $checkIn->copy()->addYears($durasi);
-        $totalHarga = $kamar->harga * $durasi;
 
         $booking = Booking::create([
-            'profile_id' => $profile->id,
+            'profile_id' => $profile->id_profile,
             'kamar_id' => $kamar->id_kamar,
             'status_booking' => 'menunggu_pembayaran',
-            'total_harga' => $totalHarga,
+            'total_harga' => $totalHargaSewa,
             'tanggal_booking' => now(),
             'batas_booking' => now()->addHours(24),
             'tanggal_check_in' => $checkIn,
@@ -55,10 +77,53 @@ class BookingController extends Controller
             'tipe_pembayaran' => 'tahunan'
         ]);
 
+        $pembayaran = new Pembayaran();
+        $pembayaran->booking_id = $booking->id_booking;
+        $pembayaran->total_pembayaran = $nominalBayar;
+        $pembayaran->jenis_pembayaran = ($persentase == 100) ? 'lunas_awal' : 'dp_awal';
+        $pembayaran->status = 'pending';
+        $pembayaran->metode_pembayaran = 'Midtrans';
+        $pembayaran->save();
 
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = config('midtrans.is_sanitized');
+        Config::$is3ds = config('midtrans.is_3ds');
 
-        return redirect()->route('booking.show', $booking->id_booking)
-            ->with('success', 'Booking berhasil dibuat! Silakan lakukan pembayaran.');
+        $orderId = 'PAY-' . $pembayaran->id_pembayaran . '-' . time();
+        $pembayaran->midtrans_code = $orderId;
+        $pembayaran->save();
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $nominalBayar,
+            ],
+            'customer_details' => [
+                'first_name' => $profile->nama_lengkap,
+                'email' => $user->email,
+                'phone' => $profile->no_hp,
+            ],
+            'item_details' => [[
+                'id' => $kamar->id_kamar,
+                'price' => (int) $nominalBayar,
+                'quantity' => 1,
+                'name' => "Sewa Kamar {$kamar->no_kamar} ({$persentase}%)"
+            ]]
+        ];
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+
+            return view('pembayaran.pay', [
+                'snapToken' => $snapToken,
+                'pembayaran' => $pembayaran,
+                'booking' => $booking
+            ]);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Midtrans Error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -105,7 +170,7 @@ class BookingController extends Controller
     public function update(Request $request, $id)
     {
         $booking = Booking::findOrFail($id);
-        
+
         $userProfileId = Auth::user()->profile->id ?? 0;
         if ($booking->profile_id !== $userProfileId) {
             abort(403);
