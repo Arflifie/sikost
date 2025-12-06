@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BookingController; // <--- Pastikan baris ini ada
+use App\Http\Controllers\BookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,30 +18,16 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Group Middleware Auth (Hanya yang login bisa akses)
-Route::middleware('auth')->group(function () {
-    
-    // --- ROUTE BAWAAN LARAVEL BREEZE (Profile) ---
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// --- AREA PENYEWA ---
+Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
+Route::patch('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
 
-    // --- ROUTE BOOKING (YANG KITA BUAT SEKARANG) ---
-    
-    // 1. Menampilkan Form Booking (Saat klik tombol "Sewa" di kamar)
-    // URL: domain.com/booking/kamar/1
-    Route::get('/booking/kamar/{id_kamar}', [BookingController::class, 'create'])
-        ->name('booking.create');
-
-    // 2. Proses Simpan Booking (Saat klik tombol "Konfirmasi Sewa")
-    Route::post('/booking/store', [BookingController::class, 'store'])
-        ->name('booking.store');
-
-    // 3. Menampilkan Riwayat Booking
-    // URL: domain.com/booking/history
-    Route::get('/booking/history', [BookingController::class, 'history'])
-        ->name('booking.history');
-
+// --- AREA ADMIN ---
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
+    Route::get('/booking/{id}', [AdminBookingController::class, 'show'])->name('booking.show');
 });
 
 require __DIR__.'/auth.php';

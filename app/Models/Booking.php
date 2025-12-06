@@ -10,12 +10,11 @@ class Booking extends Model
 {
     use HasFactory;
 
-    // Menyesuaikan dengan tabel dari divisi lain
     protected $table = 'booking'; 
     protected $primaryKey = 'id_booking';
 
     protected $fillable = [
-        'user_id',
+        'profile_id',
         'kamar_id',
         'status_booking',
         'total_harga',
@@ -33,14 +32,19 @@ class Booking extends Model
         'tanggal_check_out' => 'date',
     ];
 
-    public function user(): BelongsTo
+    /**
+     * Relasi ke Profile (Penyewa)
+     */
+    public function profile(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(Profile::class, 'profile_id');
     }
 
+    /**
+     * Relasi ke Kamar
+     */
     public function kamar(): BelongsTo
     {
-        // Pastikan 'id_kamar' sesuai dengan Primary Key di tabel kamar
         return $this->belongsTo(Kamar::class, 'kamar_id', 'id_kamar');
     }
 }
