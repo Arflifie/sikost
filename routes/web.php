@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\PelaporanController;
-use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\Penyewa\PembayaranController;
 use App\Http\Controllers\Penyewa\BerandaController;
 use App\Http\Controllers\Penyewa\RiwayatController;
 use App\Http\Controllers\Penyewa\ProfileController;

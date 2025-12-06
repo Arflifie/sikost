@@ -242,7 +242,7 @@
                             </a>
 
                             @if ($item->status == 'tersedia')
-                                <a href="{{ route('booking.index') }}?kamar_id={{ $item->id_kamar }}" class="btn-booking">
+                                <a href="{{ route('booking.create', $item->id_kamar) }}" class="btn-booking">
                                     <i class="fa-solid fa-calendar-check"></i> Booking
                                 </a>
                             @else
