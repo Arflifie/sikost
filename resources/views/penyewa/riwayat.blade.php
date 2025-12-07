@@ -361,7 +361,7 @@
                                 <div class="row g-4">
                                     <!-- INFO KAMAR -->
                                     <div class="col-md-4">
-                                        <img src="{{ $booking->kamar->foto_url ?? 'https://via.placeholder.com/300' }}"
+                                        <img src="{{ Storage::disk('s3')->url($booking->kamar->foto_kamar) }}"
                                              class="img-fluid rounded-3 mb-3 shadow-sm"
                                              style="width: 100%; height: 180px; object-fit: cover;">
                                         <h5 class="fw-bold mb-1" style="color: var(--color-midnight);">
