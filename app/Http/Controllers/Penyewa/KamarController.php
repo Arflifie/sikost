@@ -11,15 +11,15 @@ class KamarController extends Controller
     /**
      * Display a listing of the resource.
      */
-public function index(Request $request)
+    public function index(Request $request)
     {
         $query = Kamar::query();
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('no_kamar', 'ilike', "%{$search}%")
-                  ->orWhere('deskripsi_kamar', 'ilike', "%{$search}%");
+                    ->orWhere('deskripsi_kamar', 'ilike', "%{$search}%");
             });
         }
 
@@ -36,14 +36,14 @@ public function index(Request $request)
         }
 
         $kamar = $query->orderBy('status', 'desc')
-                       ->orderBy('no_kamar', 'asc')
-                       ->paginate(9);
+            ->orderBy('no_kamar', 'asc')
+            ->paginate(9);
 
         $kamar->appends($request->all());
 
         return view('penyewa.kamar', compact('kamar'));
     }
-    
+
     /**
      * Show the form for creating a new resource.
      */
@@ -65,8 +65,10 @@ public function index(Request $request)
      */
     public function show($id)
     {
-        $kamar = Kamar::findOrFail($id);
-        return view('kamar.show', compact('kamar'));
+        // $kamar = Kamar::findOrFail($id);
+        // return view('kamar.show', compact('kamar'));
+
+        return view('penyewa.detailKamar');
     }
 
     /**
