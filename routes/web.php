@@ -65,6 +65,12 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/pembayaran', [PembayaranController::class, 'adminIndex'])->name('pembayaran.index');
 
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard_admin');
+        })->name('dashboard');
+
+
+
         Route::post('/pelaporan/{id}/update', [PelaporanController::class, 'updateStatusAdmin'])->name('pelaporan.update');
 
         Route::get('/kamar', [AdminKamarController::class, 'index'])->name('kamar.index');
