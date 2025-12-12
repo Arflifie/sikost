@@ -9,41 +9,103 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* Modern Dashboard Vibes */
-        .page-header {
-            background: linear-gradient(135deg, #4f8dfb 0%, #2563eb 100%);
-            border-radius: 16px;
-            padding: 32px;
-            color: white;
-        }
+        /* === COLOR PALETTE ===
+    Royal: #334EAC
+    Midnight: #081F5C
+    China: #7096D1
+    Sky: #BAD6EB
+    Dawn: #D0E3FF
+    Moon: #F7F2EB
+    Porcelain: #EDF1F6
+    */
 
-        .card-modern {
-            border-radius: 14px;
-            border: none;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
-        }
+    body {
+        background: #EDF1F6 !important; /* Porcelain */
+    }
 
-        .table-modern tbody tr:hover {
-            background: #f7faff !important;
-        }
+    /* HEADER */
+    .page-header {
+        background: linear-gradient(135deg, #081F5C 0%, #334EAC 100%);
+        border-radius: 18px;
+        padding: 35px;
+        color: white;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+    }
 
-        .img-thumb {
-            width: 85px;
-            height: 65px;
-            border-radius: 10px;
-            object-fit: cover;
-        }
+    /* CARD */
+    .card-modern {
+        background: #F7F2EB; /* Moon */
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    }
 
-        .badge-soft {
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-        }
+    .card-modern .card-header {
+        background: transparent !important;
+        color: #334EAC;
+        font-weight: 700;
+        font-size: 1.05rem;
+        border-bottom: 1px solid #E5E7EB;
+    }
 
-        .form-label {
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
+    /* TABLE */
+    .table-modern thead {
+        background: #D0E3FF !important; /* Dawn */
+        color: #081F5C;
+        font-weight: 600;
+    }
+
+    .table-modern tbody tr:hover {
+        background: #BAD6EB33 !important; /* Sky with transparency */
+    }
+
+    /* IMAGE */
+    .img-thumb {
+        width: 85px;
+        height: 65px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #BAD6EB;
+    }
+
+    /* BUTTON PRIMARY */
+    .btn-primary {
+        background: #7096D1 !important; /* China */
+        border-color: #7096D1 !important;
+    }
+
+    .btn-primary:hover {
+        background: #334EAC !important;
+        border-color: #334EAC !important;
+    }
+
+    /* BUTTON Outline */
+    .btn-outline-primary {
+        color: #334EAC;
+        border-color: #334EAC;
+    }
+
+    .btn-outline-primary:hover {
+        background: #334EAC;
+        color: white;
+    }
+
+    /* FORM LABEL */
+    .form-label {
+        font-weight: 600;
+        color: #081F5C;
+    }
+
+    /* BADGES */
+    .badge-soft {
+        border-radius: 30px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+    }
+
+    .badge.bg-success { background: #4CAF50 !important; }
+    .badge.bg-danger { background: #E74C3C !important; }
+
     </style>
 </head>
 <body class="bg-light">
