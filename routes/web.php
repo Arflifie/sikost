@@ -96,4 +96,55 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+// Bagian Petugas (OB) - Mock Routes for Testing
+Route::get('/petugas/keluhan', function () {
+
+    $keluhan = [
+        (object)[
+            'id' => 1,
+            'judul_keluhan' => 'WC Mampet',
+            'no_kamar' => 'A12',
+            'status' => 'Pending',
+            'tanggal_keluhan' => '05 Desember 2025',
+            'waktu_keluhan' => '14:30',
+        ],
+        (object)[
+            'id' => 2,
+            'judul_keluhan' => 'Lampu Mati',
+            'no_kamar' => 'B03',
+            'status' => 'Diproses',
+            'tanggal_keluhan' => '06 Desember 2025',
+            'waktu_keluhan' => '09:15',
+        ],
+        (object)[
+            'id' => 3,
+            'judul_keluhan' => 'Kipas Rusak',
+            'no_kamar' => 'C05',
+            'status' => 'Selesai',
+            'tanggal_keluhan' => '07 Desember 2025',
+            'waktu_keluhan' => '16:45',
+        ],
+    ];
+
+    return view('petugas.laporan', compact('keluhan'));
+});
+Route::get('/petugas/keluhan/{id}', function ($id) {
+
+    $keluhan = (object)[
+        'id' => $id,
+        'judul_keluhan' => 'WC Mampet',
+        'no_kamar' => 'A12',
+        'deskripsi_keluhan' =>
+        'Sudah 2 hari WC tidak bisa digunakan dan bau menyengat.',
+        'foto_bukti' => 'keluhan/before/contoh.jpg',
+        'foto_after_perbaikan' => null,
+        'status' => 'Pending',
+        'tanggal_keluhan' => '05 Desember 2025',
+        'waktu_keluhan' => '14:30',
+    ];
+
+    return view('petugas.detail', compact('keluhan'));
+});
+// End of Petugas (OB) Mock Routes
+
 require __DIR__ . '/auth.php';
