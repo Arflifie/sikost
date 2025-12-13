@@ -136,10 +136,11 @@
                             </td>
 
                             <td class="text-end">
-                                <a href="{{ route('admin.kamar.show', $item->id_kamar) }}"
-                                   class="btn btn-sm btn-outline-primary">
+                                <a href="{{ route('admin.kamar.edit', $item->id_kamar) }}"
+                                    class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit"></i>
-                                </a>
+                                    </a>
+
 
                                 <form action="{{ route('admin.kamar.destroy', $item->id_kamar) }}"
                                       method="POST" class="d-inline"

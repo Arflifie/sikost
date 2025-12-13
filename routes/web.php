@@ -81,6 +81,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/kamar/{id}', [AdminKamarController::class, 'update'])->name('kamar.update');
         Route::delete('/kamar/{id}', [AdminKamarController::class, 'destroy'])->name('kamar.destroy');
 
+        Route::get('/kamar/{id}/edit', [AdminKamarController::class, 'edit'])->name('kamar.edit');
+
+
         // Route::get('/booking', [AdminBookingController::class, 'index'])->name('booking.index');
         // Route::get('/booking/{id}', [AdminBookingController::class, 'show'])->name('booking.show');
     });
