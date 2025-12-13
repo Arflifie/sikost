@@ -5,15 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Pelaporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PelaporanController extends Controller
 {
     /**
-     * Menampilkan daftar pelaporan milik user yang sedang login.
+     * GET /pelaporan
+     * Menampilkan riwayat pelaporan milik user.
      */
     public function index()
     {
-        $userId = Auth::id(); // ambil user_id dari session login
+        $userId = Auth::id();
 
         $pelaporan = Pelaporan::where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -23,79 +25,110 @@ class PelaporanController extends Controller
     }
 
     /**
-     * Menyimpan data pelaporan baru.
+     * POST /pelaporan
+     * Penyewa membuat laporan keluhan.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'keluhan' => 'required|string',
-            'lokasi' => 'required|string',
-            'bukti_foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'keluhan'           => 'required|string|max:255',
+            'deskripsi_keluhan' => 'required|string',
+            'no_kamar'          => 'required|string|max:10',
+            'foto_bukti'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ]);
 
-        $data = $request->only(['keluhan', 'lokasi']);
-        $data['user_id'] = Auth::id();
+        $data = [
+            'user_id'           => Auth::id(),
+            'keluhan'           => $request->keluhan,
+            'deskripsi_keluhan' => $request->deskripsi_keluhan,
+            'no_kamar'          => $request->no_kamar,
+            'tanggal_keluhan'   => now()->toDateString(),
+            'waktu_keluhan'     => now()->toTimeString(),
+            'status_admin'      => 'pending',
+            'status_ob'         => 'pending',
+        ];
 
-        // Jika ada foto bukti
-        if ($request->hasFile('bukti_foto')) {
-            $data['bukti_foto'] = $request->file('bukti_foto')->store('pelaporan', 'public');
+        if ($request->hasFile('foto_bukti')) {
+            $path = $request->file('foto_bukti')->store('bukti', 's3');
+            $data['foto_bukti'] = $path;
         }
 
         Pelaporan::create($data);
 
-        return redirect()->back()->with('success', 'Pelaporan berhasil dikirim!');
+        return redirect()->back()->with('success', 'Laporan berhasil dikirim! Menunggu verifikasi Admin.');
     }
 
     /**
-     * Menampilkan detail pelaporan tertentu
+     * GET /admin/pelaporan
+     * Admin melihat semua laporan.
      */
-    public function show($id)
+    public function indexAdmin()
     {
-        $pelaporan = Pelaporan::where('id', $id)
-            ->where('user_id', Auth::id()) // hanya bisa lihat laporan miliknya sendiri
-            ->firstOrFail();
-
-        return view('pelaporan.show', compact('pelaporan'));
+        $pelaporan = Pelaporan::with('user')->orderBy('created_at', 'desc')->get();
+        return view('admin.pelaporan.index', compact('pelaporan'));
     }
 
     /**
-     * Update pelaporan
+     * PATCH /admin/pelaporan/{id}
+     * Admin memverifikasi laporan (Verified / Rejected).
      */
-    public function update(Request $request, $id)
+    public function updateStatusAdmin(Request $request, $id)
     {
-        $pelaporan = Pelaporan::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
         $request->validate([
-            'keluhan' => 'required|string',
-            'lokasi' => 'required|string',
-            'bukti_foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'status_admin' => 'required|in:verified,rejected,pending',
         ]);
 
-        $pelaporan->keluhan = $request->keluhan;
-        $pelaporan->lokasi = $request->lokasi;
+        $pelaporan = Pelaporan::findOrFail($id);
+        $pelaporan->status_admin = $request->status_admin;
 
-        if ($request->hasFile('bukti_foto')) {
-            $pelaporan->bukti_foto = $request->file('bukti_foto')->store('pelaporan', 'public');
+        if ($request->status_admin == 'rejected') {
+            $pelaporan->status_ob = 'batal';
         }
 
         $pelaporan->save();
 
-        return redirect()->back()->with('success', 'Pelaporan berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Status laporan berhasil diperbarui.');
     }
 
     /**
-     * Hapus pelaporan
+     * GET /ob/pelaporan
+     * OB melihat laporan yang SUDAH diverifikasi Admin.
      */
-    public function destroy($id)
+    public function indexOb()
     {
-        $pelaporan = Pelaporan::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        $pelaporan = Pelaporan::where('status_admin', 'verified')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $pelaporan->delete();
+        return view('ob.pelaporan.index', compact('pelaporan'));
+    }
 
-        return redirect()->back()->with('success', 'Pelaporan berhasil dihapus!');
+    /**
+     * PATCH /ob/pelaporan/{id}
+     * OB update status pengerjaan & upload bukti perbaikan.
+     */
+    public function updateStatusOB(Request $request, $id)
+    {
+        $request->validate([
+            'status_ob' => 'required|in:proses,selesai',
+            'foto_after_perbaikan' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
+        ]);
+
+        $pelaporan = Pelaporan::findOrFail($id);
+
+        $pelaporan->status_ob = $request->status_ob;
+
+        if ($request->hasFile('foto_after_perbaikan')) {
+            if ($pelaporan->foto_after_perbaikan && Storage::disk('s3')->exists($pelaporan->foto_after_perbaikan)) {
+                Storage::disk('s3')->delete($pelaporan->foto_after_perbaikan);
+            }
+
+            $path = $request->file('foto_after_perbaikan')->store('perbaikan', 's3');
+            $pelaporan->foto_after_perbaikan = $path;
+        }
+
+        $pelaporan->save();
+
+        return redirect()->back()->with('success', 'Laporan pekerjaan berhasil diupdate.');
     }
 }
