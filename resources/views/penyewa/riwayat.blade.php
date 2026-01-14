@@ -361,14 +361,14 @@
                                 <div class="row g-4">
                                     <!-- INFO KAMAR -->
                                     <div class="col-md-4">
-                                        <img src="{{ Storage::disk('s3')->url($booking->kamar->foto_kamar) }}"
+                                        <img src="{{ $booking->kamar->foto_url ?? 'https://via.placeholder.com/300' }}"
                                              class="img-fluid rounded-3 mb-3 shadow-sm"
                                              style="width: 100%; height: 180px; object-fit: cover;">
                                         <h5 class="fw-bold mb-1" style="color: var(--color-midnight);">
                                             Kamar {{ $booking->kamar->no_kamar }}
                                         </h5>
                                         <p class="text-muted small mb-0">
-                                            <i class="fas fa-map-marker-alt me-"></i> SiKost Area Utama
+                                            <i class="fas fa-map-marker-alt me-1"></i> SiKost Area Utama
                                         </p>
                                     </div>
 
