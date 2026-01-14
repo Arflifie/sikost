@@ -368,7 +368,7 @@
                                             Kamar {{ $booking->kamar->no_kamar }}
                                         </h5>
                                         <p class="text-muted small mb-0">
-                                            <i class="fas fa-map-marker-alt me-1"></i> SiKost Area Utama
+                                            <i class="fas fa-map-marker-alt me-"></i> SiKost Area Utama
                                         </p>
                                     </div>
 
